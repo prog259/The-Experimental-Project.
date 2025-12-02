@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Water Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_6_319)">
+                            <path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="currentColor"></path>
+                        </g>
+                        <defs>
+                            <clippath id="clip0_6_319">
+                                <rect fill="white" height="48" width="48"></rect>
+                            </clippath>
+                        </defs>
+                    </svg>
+                </div>
+                <h2>Daily Water Tracker</h2>
+            </div>
+            <button class="settings-btn">
+                <span class="material-symbols-outlined">settings</span>
+            </button>
+        </header>
+        <main>
+            <h1 id="current-date">Today, October 26</h1>
+            <div class="progress-container">
+                <div class="progress-labels">
+                    <p>Daily Goal</p>
+                    <p id="progress-percentage">50%</p>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress" style="width: 50%;"></div>
+                </div>
+                <p id="progress-text" class="progress-text">4/8 Glasses</p>
+            </div>
+            <div id="cups-container" class="cups-container">
+            </div>
+            <button id="reset-btn" class="reset-btn">Reset Daily Progress</button>
+        </main>
+    </div>
+    <div id="settings-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Settings</h2>
+            <div class="setting">
+                <label for="goal-input">Daily Goal (glasses):</label>
+                <input type="number" id="goal-input" min="1" value="8">
+            </div>
+            <div class="setting">
+                <button id="export-btn">Export Data</button>
+                <button id="import-btn">Import Data</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;">
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
