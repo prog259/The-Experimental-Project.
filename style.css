@@ -234,3 +234,14 @@ main h1 {
     cursor: pointer;
     margin-right: 0.5rem;
 }
+
+.message-container {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    background-color: #eef2ff;
+    color: #4338ca;
+    text-align: center;
+    font-weight: 500;
+    display: none; /* Hidden by default */
+}
