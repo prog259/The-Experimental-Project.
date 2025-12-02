@@ -23,7 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const playWaterDropSound = () => {
         if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.error("Web Audio API is not supported in this browser.");
+                return;
+            }
         }
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
@@ -42,31 +47,49 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadState = () => {
-        const savedGoal = localStorage.getItem('waterTrackerGoal');
-        if (savedGoal) {
-            TOTAL_CUPS = parseInt(savedGoal, 10);
-            goalInput.value = TOTAL_CUPS;
-        }
+        try {
+            const savedGoal = localStorage.getItem('waterTrackerGoal');
+            if (savedGoal) {
+                TOTAL_CUPS = parseInt(savedGoal, 10);
+                goalInput.value = TOTAL_CUPS;
+            }
 
-        const data = JSON.parse(localStorage.getItem('waterTracker'));
-        if (data && new Date(data.date).toDateString() === today.toDateString()) {
-            filledCups = data.filledCups;
-        } else {
+            const dataRaw = localStorage.getItem('waterTracker');
+            if (dataRaw) {
+                const data = JSON.parse(dataRaw);
+                if (data && new Date(data.date).toDateString() === today.toDateString()) {
+                    filledCups = data.filledCups;
+                } else {
+                    filledCups = 0;
+                    saveProgress();
+                }
+            }
+        } catch (e) {
+            console.error("Error loading state from localStorage", e);
+            // If data is corrupt, reset it.
             filledCups = 0;
             saveProgress();
         }
     };
 
     const saveProgress = () => {
-        localStorage.setItem('waterTracker', JSON.stringify({ filledCups, date: today.toISOString() }));
+        try {
+            localStorage.setItem('waterTracker', JSON.stringify({ filledCups, date: today.toISOString() }));
+        } catch (e) {
+            console.error("Error saving progress to localStorage", e);
+        }
     };
 
     const saveGoal = () => {
-        localStorage.setItem('waterTrackerGoal', TOTAL_CUPS);
+        try {
+            localStorage.setItem('waterTrackerGoal', TOTAL_CUPS);
+        } catch (e) {
+            console.error("Error saving goal to localStorage", e);
+        }
     };
 
     const updateUI = () => {
-        const percentage = (filledCups / TOTAL_CUPS) * 100;
+        const percentage = TOTAL_CUPS > 0 ? (filledCups / TOTAL_CUPS) * 100 : 0;
         progress.style.width = `${percentage}%`;
         progressPercentage.textContent = `${Math.round(percentage)}%`;
         progressText.textContent = `${filledCups}/${TOTAL_CUPS} Glasses`;
@@ -100,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             cupsContainer.appendChild(cup);
         }
+        updateUI(); // Ensure UI is correct after creating cups
     };
 
     resetBtn.addEventListener('click', () => {
@@ -132,22 +156,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             saveGoal();
             createCups();
-            updateUI();
         }
     });
 
     exportBtn.addEventListener('click', () => {
-        const data = {
-            progress: JSON.parse(localStorage.getItem('waterTracker')),
-            goal: localStorage.getItem('waterTrackerGoal')
-        };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "water_tracker_data.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+        try {
+            const progressData = JSON.parse(localStorage.getItem('waterTracker')) || { filledCups: filledCups, date: today.toISOString() };
+            const goalData = localStorage.getItem('waterTrackerGoal') || TOTAL_CUPS.toString();
+
+            const dataToExport = {
+                progress: progressData,
+                goal: goalData
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "water_tracker_data.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        } catch (e) {
+            console.error("Error exporting data", e);
+            alert("Could not export data.");
+        }
     });
 
     importBtn.addEventListener('click', () => {
@@ -156,30 +187,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     importFile.addEventListener('change', (event) => {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.progress && data.goal) {
-                        localStorage.setItem('waterTracker', JSON.stringify(data.progress));
-                        localStorage.setItem('waterTrackerGoal', data.goal);
-                        loadState();
-                        createCups();
-                        updateUI();
-                        settingsModal.style.display = 'none';
-                    } else {
-                        alert('Invalid data file.');
-                    }
-                } catch (error) {
-                    alert('Error importing data.');
-                }
-            };
-            reader.readAsText(file);
+        if (!file) {
+            return;
         }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data && data.hasOwnProperty('progress') && data.hasOwnProperty('goal')) {
+                    if (typeof data.progress.filledCups !== 'number' || typeof data.progress.date !== 'string') {
+                        alert('Invalid data file: progress data is malformed.');
+                        return;
+                    }
+                    const goal = parseInt(data.goal, 10);
+                    if (isNaN(goal) || goal <= 0) {
+                        alert('Invalid data file: goal is not a positive number.');
+                        return;
+                    }
+
+                    localStorage.setItem('waterTracker', JSON.stringify(data.progress));
+                    localStorage.setItem('waterTrackerGoal', data.goal.toString());
+
+                    loadState();
+                    createCups();
+
+                    settingsModal.style.display = 'none';
+                } else {
+                    alert('Invalid data file: missing "progress" or "goal" keys.');
+                }
+            } catch (error) {
+                console.error("Error importing data:", error);
+                alert('Error importing data. The file might be corrupted or in the wrong format.');
+            } finally {
+                // Reset file input to allow re-importing the same file
+                importFile.value = '';
+            }
+        };
+        reader.readAsText(file);
     });
 
+    // Initial load
     loadState();
     createCups();
-    updateUI();
 });
