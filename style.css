@@ -1,0 +1,151 @@
+:root {
+    --primary-color: #0f6df0;
+    --background-light: #f5f7f8;
+    --text-color-light: #101822;
+    --progress-bar-background: #e0e0e0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-light);
+    color: var(--text-color-light);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 960px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.logo-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--primary-color);
+}
+
+.logo h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.settings-btn {
+    background-color: #e2e8f0;
+    border: none;
+    border-radius: 0.5rem;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+main {
+    text-align: center;
+}
+
+main h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.progress-container {
+    max-width: 512px;
+    margin: 0 auto;
+    margin-bottom: 40px;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.progress-bar {
+    background-color: var(--progress-bar-background);
+    border-radius: 9999px;
+    height: 8px;
+    width: 100%;
+}
+
+#progress {
+    background-color: var(--primary-color);
+    border-radius: 9999px;
+    height: 100%;
+}
+
+.progress-text {
+    text-align: right;
+    margin-top: 8px;
+    color: #64748b;
+}
+
+.cups-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.cup {
+    width: 96px;
+    height: 96px;
+    border-radius: 0.75rem;
+    background-color: #e2e8f0;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cup:hover {
+    transform: scale(1.05);
+}
+
+.cup.filled {
+    background-color: rgba(15, 109, 240, 0.2);
+    color: var(--primary-color);
+}
+
+.cup .material-symbols-outlined {
+    font-size: 3rem;
+    font-variation-settings: 'FILL' 0;
+}
+
+.cup.filled .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1;
+}
+
+.reset-btn {
+    background-color: transparent;
+    border: none;
+    color: #64748b;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 40px;
+}
